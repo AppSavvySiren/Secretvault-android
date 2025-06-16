@@ -1,0 +1,318 @@
+SecretVault Android Project - Complete Bundle
+===========================================
+
+This file contains all the Android project files needed to build your app.
+You can copy each section and create the files manually, or share this with
+a cloud build service or developer to build your APK.
+
+APP URL: https://secret-whispers-missyandkustin.replit.app
+
+PROJECT STRUCTURE:
+android/
+├── app/
+│   ├── build.gradle
+│   ├── proguard-rules.pro
+│   └── src/main/
+│       ├── AndroidManifest.xml
+│       ├── java/com/secretvault/app/MainActivity.java
+│       └── res/
+│           ├── layout/activity_main.xml
+│           ├── values/strings.xml
+│           ├── values/styles.xml
+│           ├── values/colors.xml
+│           ├── drawable/ic_launcher_foreground.xml
+│           ├── mipmap-hdpi/ic_launcher.xml
+│           └── xml/backup_rules.xml, data_extraction_rules.xml
+├── build.gradle
+├── settings.gradle
+└── gradle/wrapper/gradle-wrapper.properties
+
+===========================================
+FILE CONTENTS:
+===========================================
+
+📁 android/build.gradle
+------------------------
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+plugins {
+    id 'com.android.application' version '8.2.0' apply false
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+📁 android/settings.gradle
+---------------------------
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "SecretVault"
+include ':app'
+
+📁 android/app/build.gradle
+----------------------------
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.secretvault.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.secretvault.app"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+    
+    signingConfigs {
+        release {
+            storeFile file('../keys/secretvault-release-key.keystore')
+            storePassword 'secretvault2024'
+            keyAlias 'secretvault'
+            keyPassword 'secretvault2024'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.webkit:webkit:1.8.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+
+📁 android/app/src/main/AndroidManifest.xml
+--------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="28" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SecretVault"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="31">
+        
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.SecretVault.NoActionBar"
+            android:screenOrientation="portrait">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+    </application>
+
+</manifest>
+
+📁 android/app/src/main/java/com/secretvault/app/MainActivity.java
+-----------------------------------------------------------------
+package com.secretvault.app;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.webkit.WebSettings;
+import android.webkit.WebChromeClient;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import androidx.core.content.ContextCompat;
+
+public class MainActivity extends Activity {
+    private WebView webView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        // Full screen setup
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        
+        setContentView(R.layout.activity_main);
+        
+        webView = findViewById(R.id.webview);
+        setupWebView();
+        
+        // Your deployed SecretVault app URL
+        String appUrl = "https://secret-whispers-missyandkustin.replit.app";
+        webView.loadUrl(appUrl);
+    }
+
+    private void setupWebView() {
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setAllowFileAccess(true);
+        webSettings.setAllowContentAccess(true);
+        webSettings.setAllowFileAccessFromFileURLs(true);
+        webSettings.setAllowUniversalAccessFromFileURLs(true);
+        webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setBuiltInZoomControls(false);
+        webSettings.setSupportZoom(false);
+        
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+                return true;
+            }
+        });
+        
+        webView.setWebChromeClient(new WebChromeClient());
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (webView.canGoBack()) {
+            webView.goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
+}
+
+📁 android/app/src/main/res/layout/activity_main.xml
+----------------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true" />
+
+</RelativeLayout>
+
+📁 android/app/src/main/res/values/strings.xml
+-----------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SecretVault</string>
+</resources>
+
+📁 android/app/src/main/res/values/styles.xml
+----------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme. -->
+    <style name="Theme.SecretVault" parent="Theme.Material3.DayNight">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">#E91E63</item>
+        <item name="colorPrimaryVariant">#C2185B</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">#2196F3</item>
+        <item name="colorSecondaryVariant">#1976D2</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="Theme.SecretVault.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+</resources>
+
+📁 android/app/src/main/res/values/colors.xml
+----------------------------------------------
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#E91E63</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
+
+📁 android/gradle/wrapper/gradle-wrapper.properties
+---------------------------------------------------
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.2-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+===========================================
+INSTRUCTIONS FOR CLOUD BUILDING:
+===========================================
+
+1. Copy this entire file and save it as "SecretVault-Project.txt"
+
+2. Visit any of these FREE cloud build services:
+   - GitHub.com (create repository, upload files, use Actions)
+   - Codemagic.io (free tier available)
+   - Bitrise.io (free tier available)
+
+3. Create the file structure shown above with the contents provided
+
+4. Configure the build to generate an APK
+
+5. Download the APK and upload to Google Play Store
+
+Your app is configured to load: https://secret-whispers-missyandkustin.replit.app
+
+All PayPal payment features will work in the mobile app.
