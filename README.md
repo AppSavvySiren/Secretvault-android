@@ -1,1 +1,1 @@
- “Create codemagic.yaml”.# Secretvault-android
+# Secretvault-android
