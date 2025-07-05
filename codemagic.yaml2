@@ -1,0 +1,117 @@
+workflows:
+  android-workflow:
+    name: SecretVault Android Build
+    max_build_duration: 60
+    environment:
+      java: 11
+    scripts:
+      - name: Set up Android project
+        script: |
+          echo "Setting up Android project structure"
+          mkdir -p android/app/src/main/java/com/secretvault/app
+          mkdir -p android/app/src/main/res/layout
+          mkdir -p android/app/src/main/res/values
+          mkdir -p android/gradle/wrapper
+      - name: Create project files
+        script: |
+          cd android
+          
+          # Root build.gradle
+          cat > build.gradle << 'EOF'
+          buildscript {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:7.4.2'
+              }
+          }
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          EOF
+          
+          # settings.gradle
+          echo 'include ":app"' > settings.gradle
+          
+          # App build.gradle
+          cat > app/build.gradle << 'EOF'
+          apply plugin: 'com.android.application'
+          android {
+              compileSdkVersion 33
+              defaultConfig {
+                  applicationId "com.secretvault.app"
+                  minSdkVersion 21
+                  targetSdkVersion 33
+                  versionCode 1
+                  versionName "1.0"
+              }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_1_8
+                  targetCompatibility JavaVersion.VERSION_1_8
+              }
+          }
+          dependencies {
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+          }
+          EOF
+          
+          # AndroidManifest.xml
+          cat > app/src/main/AndroidManifest.xml << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+              package="com.secretvault.app">
+              <uses-permission android:name="android.permission.INTERNET" />
+              <application
+                  android:allowBackup="true"
+                  android:label="SecretVault"
+                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+          
+          # MainActivity.java
+          cat > app/src/main/java/com/secretvault/app/MainActivity.java << 'EOF'
+          package com.secretvault.app;
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import android.webkit.WebSettings;
+          public class MainActivity extends Activity {
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  WebView webView = new WebView(this);
+                  WebSettings settings = webView.getSettings();
+                  settings.setJavaScriptEnabled(true);
+                  settings.setDomStorageEnabled(true);
+                  webView.setWebViewClient(new WebViewClient());
+                  webView.loadUrl("https://secret-whispers-missyandkustin.replit.app");
+                  setContentView(webView);
+              }
+          }
+          EOF
+          
+          # Gradle wrapper
+          echo 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.6-bin.zip' > gradle/wrapper/gradle-wrapper.properties
+          curl -o gradlew https://raw.githubusercontent.com/gradle/gradle/master/gradlew
+          chmod +x gradlew
+      - name: Build APK
+        script: |
+          cd android
+          ./gradlew assembleDebug
+    artifacts:
+      - android/app/build/outputs/**/*.apk
